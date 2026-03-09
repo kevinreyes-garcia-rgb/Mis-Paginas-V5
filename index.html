@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base 2 - Interfaz Futurista</title>
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Evita barras de desplazamiento */
+            background-color: #000000;
+            font-family: 'Courier New', Courier, monospace; /* Fuente tipo terminal */
+        }
+
+        /* --- CANVAS DE PARTÍCULAS --- */
+        #particles-js {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Detrás de todo */
+        }
+
+        /* --- CONTENEDOR PRINCIPAL (La tarjeta azul) --- */
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; /* Delante de las partículas */
+            
+            /* Estilo Futurista / Cristal Azul */
+            background: rgba(0, 10, 30, 0.7); /* Azul muy oscuro semitransparente */
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid #00f7ff; /* Borde Cian */
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.4), inset 0 0 20px rgba(0, 247, 255, 0.1);
+            backdrop-filter: blur(5px); /* Efecto borroso detrás */
+            text-align: center;
+            width: 300px;
+            
+            /* Animación de entrada */
+            animation: fadeIn 2s ease-out;
+        }
+
+        /* --- IMAGEN --- */
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%; /* Círculo */
+            border: 3px solid #00f7ff;
+            box-shadow: 0 0 25px #00f7ff; /* Resplandor de la imagen */
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05); /* Efecto zoom al pasar el mouse */
+        }
+
+        /* --- TEXTO --- */
+        h1 {
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin: 0;
+            text-shadow: 0 0 10px #00f7ff; /* Resplandor del texto */
+        }
+
+        .subtitle {
+            color: #00f7ff;
+            font-size: 12px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        /* --- ANIMACIÓN DE ENTRADA --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="particles-js"></canvas>
+
+    <div class="container">
+        <img src="https://i.ibb.co/XfsCQ0Qg/tu-imagen.jpg" 
+             onerror="this.src='https://cdn-icons-png.flaticon.com/512/10447/10447190.png'" 
+             alt="Avatar" 
+             class="profile-img">
+        
+        <h1>Hola esta es la base 2</h1>
+        <p class="subtitle">SISTEMA ONLINE /// CONECTADO</p>
+    </div>
+
+    <script>
+        /* --- CÓDIGO JAVASCRIPT PARA LAS PARTÍCULAS --- */
+        const canvas = document.getElementById('particles-js');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray;
+
+        // Ajustar tamaño del canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Manejar redimensionamiento de ventana
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+
+        // Clase Partícula
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2; // Tamaño de los puntos
+                this.speedX = (Math.random() * 1.5) - 0.75; // Velocidad X
+                this.speedY = (Math.random() * 1.5) - 0.75; // Velocidad Y
+                this.color = '#00f7ff'; // Color Cian
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Rebotar en los bordes
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Inicializar partículas
+        function init() {
+            particlesArray = [];
+            const numberOfParticles = (canvas.width * canvas.height) / 9000; // Densidad de partículas
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        // Conectar partículas con líneas (Efecto Red)
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(0, 247, 255,' + opacityValue + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Bucle de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connect();
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
